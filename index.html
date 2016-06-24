@@ -1,0 +1,70 @@
+<!--
+	An example integration
+	-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>NULLDEV - SPEC</title>
+    <!-- CSS -->
+    <!-- Stylesheet, fonts and music not included -->
+    <link rel="stylesheet" type="text/css" href="extra/style.css">
+    <!-- JS -->
+    <script type="text/javascript" src="script.js"></script>
+    <!-- Demo script -->
+    <script>
+        function onLoad() {
+            var title = document.getElementById("title");
+            var request = new XMLHttpRequest();
+            var spectrum;
+
+            title.innerHTML = "DOWNLOADING<br>AUDIO";
+            request.onload = function(e) {
+                title.innerHTML = "[SPECTRUM]";
+                spectrum = play(request.response);
+                spectrum.updateFps = true;
+                window.onresize = function() {
+                    spectrum.reCalc();
+                };
+                //Uncomment for a nice spectrum at the bottom of the page!
+                /*spectrum.canvasCentreYOverride = spectrum.canvas.offsetHeight - 100;
+                 spectrum.particleOpacityReductionSpeed = 0.008;
+                 spectrum.maxDiff = 5;
+                 spectrum.flipBars = true;
+                 spectrum.flipParticles = false;
+                 spectrum.perRunParticleSpawn = 2;
+                 spectrum.reCalc();
+                 window.onresize = function() {
+                 spectrum.canvasCentreYOverride = spectrum.canvas.offsetHeight - 100;
+                 spectrum.reCalc();
+                 }*/
+            };
+            request.onerror = function(e) {
+                title.innerHTML = "ERROR!";
+                console.log("Failed to download audio file!");
+                console.log(e);
+            };
+            request.open('GET', "music/1.mp3", true);
+            request.responseType = 'arraybuffer';
+            downloadRunning = true;
+            request.send();
+            //FPS
+            var fpsElement = document.getElementById('fps');
+            setInterval(function(){
+                if(Util.isValid(spectrum) && Util.isValid(spectrum.fps)) {
+                    fpsElement.innerHTML = spectrum.fps.toFixed(1);
+                }
+            }, 100);
+        }
+    </script>
+</head>
+<body onload="onLoad()">
+<div id="title">[SPECTRUM]</div>
+<div id="fps">0</div>
+<!-- Spektrum -->
+<div id="canvas_wrapper">
+    <canvas id="canvas"></canvas>
+</div>
+</body>
+</html>
