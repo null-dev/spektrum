@@ -60,12 +60,36 @@ function setupSpectrum() {
     spectrum.setState = function (newState) {
         spectrum.state = newState;
         //Fire state change
-        if (Util.isValid(spectrum.onStateChange) && Util.isFunction(spectrum.onStateChange)) {
-            spectrum.onStateChange();
+        if (Util.isValid(spectrum.onStateChange)) {
+            if(Util.isFunction(spectrum.onStateChange)) {
+                spectrum.onStateChange();
+            }
+            if(spectrum.state !== SpectrumState.RUNNING) {
+                cancelAnimationFrame(spectrum.requestId);
+            }
         }
     };
     spectrum.reCalc = function() {
         calcSpectrum(spectrum);
+    };
+    spectrum.stop = function() {
+        spectrum.setState(SpectrumState.IDLE);
+        cancelAnimationFrame(spectrum.requestId);
+        if(Util.isValid(spectrum.audioBufferSourceNode)) {
+            spectrum.audioBufferSourceNode.stop();
+        }
+    };
+    spectrum.play = function(audioBuffer) {
+        if(spectrum.state === SpectrumState.RUNNING) {
+            spectrum.stop();
+        }
+        spectrum.setState(SpectrumState.DECODING);
+        audioContext.decodeAudioData(audioBuffer, function (buffer) {
+            //Ready to go!
+            startSpectrum(spectrum, buffer);
+        }, function (e) {
+            error("Failed to decode audio!", e);
+        });
     };
     spectrum.tick = 0;
     spectrum.barWidth = 3;
@@ -109,15 +133,13 @@ function setupSpectrum() {
 
 //Play a song in the spectrum (arraybuffer)
 function play(audioBuffer) {
-    var spectrum = setupSpectrum();
-    spectrum.setState(SpectrumState.DECODING);
-    audioContext.decodeAudioData(audioBuffer, function (buffer) {
-        //Ready to go!
-        startSpectrum(spectrum, buffer)
-    }, function (e) {
-        error("Failed to decode audio!", e);
-    });
+    var spectrum = newSpectrum();
+    spectrum.play(audioBuffer);
     return spectrum;
+}
+
+function newSpectrum() {
+    return setupSpectrum();
 }
 
 function startSpectrum(spectrum, buffer) {
@@ -128,11 +150,14 @@ function startSpectrum(spectrum, buffer) {
     spectrum.audioBufferSourceNode.buffer = buffer;
     spectrum.audioBufferSourceNode.start();
     calcSpectrum(spectrum);
-    var simpleDrawSpectrum = function () {
-        drawSpectrum(spectrum);
+    if(spectrum.state !== SpectrumState.RUNNING) {
+        var simpleDrawSpectrum = function () {
+            drawSpectrum(spectrum);
+            spectrum.requestId = requestAnimationFrame(simpleDrawSpectrum);
+        };
         spectrum.requestId = requestAnimationFrame(simpleDrawSpectrum);
-    };
-    spectrum.requestId = requestAnimationFrame(simpleDrawSpectrum);
+    }
+    spectrum.setState(SpectrumState.RUNNING);
 }
 
 function calcSpectrum(spectrum) {
