@@ -4,6 +4,9 @@ A (pretty good looking) HTML5 spectrum!
 ## Screenshot
 ![Screenshot](https://raw.githubusercontent.com/null-dev/spektrum/master/screenshot.png)
 
+## Live demo
+[At my website](http://nulldev.xyz/spektrum/)
+
 ## About
 I haven't seen a nice HTML5 spectrum yet so I made my own!
 
