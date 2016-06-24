@@ -2,7 +2,7 @@
 A (pretty good looking) HTML5 spectrum!
 
 ## Screenshot
-![Screenshot](https://raw.githubusercontent.com/null-dev/Spektrum/master/screenshot.jpg)
+![Screenshot](https://raw.githubusercontent.com/null-dev/spektrum/master/screenshot.png)
 
 ## About
 I haven't seen a nice HTML5 spectrum yet so I made my own!
